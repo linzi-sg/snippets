@@ -1,0 +1,101 @@
+---
+title: "Demo Powerpoint Knitted from R Markdown"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr)
+library(ggplot2)
+library(flextable)
+
+```
+
+## Demonstration for markdown syntax
+
+*italic*, **bold**, ~subscript~, ^superscript^, [small caps]{.smallcaps}, `verbatim`
+
+<br>
+
+1. Numbered points
+1. In running order
+1. No matter what values were provided
+
+<br>
+
+- Bullet point 1
+- Bullet point 2
+
+# Section for plots
+
+## Plot done in base R
+
+
+```{r, fig.width = 9, fig.height = 3.71}
+# dimensions of my default 1col template:
+# width: 22.86 (9"), height: 9.43cm (3.71")
+
+barplot(n ~ year + class, data = mpg %>% count(class, year),
+        xlab = "Class", ylab = "Total", legend.text = TRUE,
+        args.legend = c(x = "top", title = "Year"))
+
+```
+
+
+## Plot done in ggplot2
+
+```{r, fig.width = 9, fig.height = 3.71}
+# dimensions of my default 1col template:
+# width: 22.86 (9"), height: 9.43cm (3.71")
+
+ggplot(mpg,
+       aes(class, fill = factor(year))) +
+  geom_bar(position = "stack", color = "black") +
+  labs(x = "Class", y = "Total", fill = "Year") +
+  scale_fill_brewer(palette = "Greys") +
+  theme_classic() +
+  theme(legend.position = c(0.5, 1),
+        legend.justification = c(0.5, 1))
+```
+
+
+# Section for tables
+
+## Tables done in kable / flextable
+
+:::::: {.columns}
+::: {.column}
+
+```{r}
+dt <- mpg %>%
+  count(class, year) %>%
+  tidyr::pivot_wider(names_from = year, values_from = n) %>%
+  mutate(Total = `1999` + `2008`)
+
+# no need to specify dimensions as kable's output will fit automatically
+# within the template's placeholder, but difficult to manipulate column widths
+knitr::kable(dt) 
+```
+
+:::
+
+::: {.column}
+
+```{r, ft.left = 5.08, ft.top = 1.31}
+# dimensions & position of my default 2col template:
+# width: 11.22cm (4.42"), height: 9.43cm (3.71")
+# 12.91cm (5.08") from left for right column, 3.33cm (1.31") from top
+# (note: position on slide needs to be specified for proper alignment, as this
+# output doesn't fit automatically inside the placeholders)
+
+flextable(dt) %>%
+  width(j = 1, width = 4, unit = "cm") %>%
+  width(j = 2:4, width = (11.22-4)/3, unit = "cm") %>%
+  theme_zebra()
+```
+
+:::
+::::::
